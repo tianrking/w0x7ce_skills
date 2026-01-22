@@ -1,0 +1,23 @@
+{
+  "name": "w0x7ce-skills",
+  "owner": {
+    "name": "w0x7ce",
+    "email": "w0x7ce@example.com"
+  },
+  "metadata": {
+    "description": "Personal skills for content publishing and automation",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "publishing-skills",
+      "description": "Content publishing skills for social platforms",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/w0x7ce-post-to-x",
+        "./skills/w0x7ce-post-to-rednote"
+      ]
+    }
+  ]
+}
