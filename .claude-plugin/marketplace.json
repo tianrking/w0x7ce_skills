@@ -16,7 +16,8 @@
       "strict": false,
       "skills": [
         "./skills/w0x7ce-post-to-x",
-        "./skills/w0x7ce-post-to-rednote"
+        "./skills/w0x7ce-post-to-rednote",
+        "./skills/w0x7ce-post-to-tencent-docs"
       ]
     }
   ]
