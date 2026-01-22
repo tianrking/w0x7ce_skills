@@ -66,122 +66,77 @@ async function waitForElement(session: ChromeSession, selectors: string[], timeo
 async function clickStartPostButton(session: ChromeSession): Promise<void> {
   console.log('[linkedin] Looking for "Start a post" button...');
 
-  // Wait a bit for page to fully load
+  // Wait for page to fully load
   await sleep(3000);
 
-  // Debug: Show all clickable elements
-  const debugInfo = await session.cdp.send<{ result: { value: string } }>('Runtime.evaluate', {
+  // Debug: Find the exact button and get its position
+  const buttonInfo = await session.cdp.send<{ result: { value: any } }>('Runtime.evaluate', {
     expression: `
       (function() {
-        const results = [];
         const all = document.querySelectorAll('*');
         for (const el of all) {
           if (el.offsetParent !== null) {
-            const rect = el.getBoundingClientRect();
+            const text = (el.textContent || '').trim();
             const tag = el.tagName.toLowerCase();
             const classList = el.className || '';
-            const text = (el.textContent || '').trim().substring(0, 30);
-            const ariaLabel = el.getAttribute('aria-label') || '';
 
-            // Look for buttons/divs/spans with relevant text
-            if ((tag === 'button' || tag === 'div' || tag === 'span') &&
-                rect.width > 50 && rect.width < 500 && rect.height > 30 && rect.height < 100) {
-              const hasRelevantText = text.includes('post') || text.includes('Post') ||
-                                       text.includes('分享') || text.includes('發佈') ||
-                                       ariaLabel.includes('post') || ariaLabel.includes('Post') ||
-                                       classList.includes('share');
-              if (hasRelevantText) {
-                results.push(tag + '@' + Math.round(rect.x) + ',' + Math.round(rect.y) +
-                  '[' + Math.round(rect.width) + 'x' + Math.round(rect.height) + ']: ' +
-                  classList.substring(0, 40) + ': ' + text + ' | aria: ' + ariaLabel);
-              }
+            // Look specifically for "Start a post" text
+            if (text === 'Start a post' && (tag === 'button' || tag === 'div' || tag === 'span')) {
+              const rect = el.getBoundingClientRect();
+              el.scrollIntoView({ block: 'center' });
+              return {
+                found: true,
+                x: rect.x + rect.width / 2,
+                y: rect.y + rect.height / 2,
+                text: text,
+                tag: tag,
+                classList: classList.substring(0, 50)
+              };
             }
           }
         }
-        return results.slice(0, 20).join(' | ');
+        return { found: false };
       })()
     `,
     returnByValue: true,
   }, { sessionId: session.sessionId, timeoutMs: 30_000 });
 
-  console.log(`[linkedin] Candidate elements: ${debugInfo.result.value?.substring(0, 500) || 'none'}`);
+  console.log(`[linkedin] Button info: ${JSON.stringify(buttonInfo.result.value)}`);
 
-  // Try to find and click the button using multiple strategies
-  const clicked = await session.cdp.send<{ result: { value: boolean } }>('Runtime.evaluate', {
-    expression: `
-      (function() {
-        // Strategy 1: Look for elements with aria-label containing "post" or "分享"
-        const all = document.querySelectorAll('*');
-        for (const el of all) {
-          if (el.offsetParent !== null) {
-            const ariaLabel = (el.getAttribute('aria-label') || '').toLowerCase();
-            const text = (el.textContent || '').trim().toLowerCase();
-
-            if ((ariaLabel.includes('post') || ariaLabel.includes('分享') || ariaLabel.includes('發佈')) ||
-                (text === 'start a post' || text === 'start post' || text === 'start a post ')) {
-              el.scrollIntoView({ block: 'center' });
-              el.click();
-              return true;
-            }
-          }
-        }
-
-        // Strategy 2: Look for specific class names
-        const shareBox = document.querySelector('.share-box-feed-entry__trigger, [data-control-name="share_box"]');
-        if (shareBox && shareBox.offsetParent !== null) {
-          shareBox.scrollIntoView({ block: 'center' });
-          shareBox.click();
-          return true;
-        }
-
-        // Strategy 3: Look for buttons with "Create" or "Post" icon
-        const buttons = document.querySelectorAll('button, div[role="button"]');
-        for (const btn of buttons) {
-          if (btn.offsetParent !== null) {
-            const classList = btn.className || '';
-            if (classList.includes('create') || classList.includes('share') || classList.includes('post')) {
-              btn.scrollIntoView({ block: 'center' });
-              btn.click();
-              return true;
-            }
-          }
-        }
-
-        return false;
-      })()
-    `,
-    returnByValue: true,
-  }, { sessionId: session.sessionId });
-
-  if (!clicked.result.value) {
-    // Try clicking at a specific position (LinkedIn usually has the button at top-left or center)
-    console.log('[linkedin] Trying to click at common button position...');
-    await session.cdp.send('Input.dispatchMouseEvent', {
-      type: 'mousePressed',
-      x: 200,
-      y: 200,
-      button: 'left',
-      clickCount: 1
-    }, { sessionId: session.sessionId });
-    await sleep(50);
-    await session.cdp.send('Input.dispatchMouseEvent', {
-      type: 'mouseReleased',
-      x: 200,
-      y: 200,
-      button: 'left',
-      clickCount: 1
-    }, { sessionId: session.sessionId });
+  if (!buttonInfo.result.value?.found) {
+    throw new Error('Could not find "Start a post" button');
   }
 
-  console.log('[linkedin] Button clicked');
-  await sleep(3000);
+  const { x, y } = buttonInfo.result.value;
+  console.log(`[linkedin] Clicking button at (${x}, ${y})`);
+
+  // Click using mouse events
+  await session.cdp.send('Input.dispatchMouseEvent', {
+    type: 'mousePressed',
+    x, y,
+    button: 'left',
+    clickCount: 1
+  }, { sessionId: session.sessionId });
+  await sleep(50);
+  await session.cdp.send('Input.dispatchMouseEvent', {
+    type: 'mouseReleased',
+    x, y,
+    button: 'left',
+    clickCount: 1
+  }, { sessionId: session.sessionId });
+
+  console.log('[linkedin] Button clicked! Waiting for editor modal to load...');
+  // Wait longer for modal to fully appear
+  await sleep(5000);
 }
 
 async function fillEditor(session: ChromeSession, text: string): Promise<void> {
   console.log('[linkedin] Waiting for editor to load...');
-  await sleep(3000);
 
-  // Debug: Show all editable elements
+  // Wait longer for the modal to fully load
+  await sleep(5000);
+
+  // Debug: Show all potential text input elements (expanded search)
   const editorDebug = await session.cdp.send<{ result: { value: string } }>('Runtime.evaluate', {
     expression: `
       (function() {
@@ -194,41 +149,62 @@ async function fillEditor(session: ChromeSession, text: string): Promise<void> {
             const contentEditable = el.getAttribute('contenteditable');
             const role = el.getAttribute('role');
             const placeholder = el.getAttribute('placeholder') || '';
+            const textContent = (el.textContent || '').trim().substring(0, 20);
 
-            // Look for potential editor elements
-            if (contentEditable === 'true' || role === 'textbox' || placeholder) {
-              const rect = el.getBoundingClientRect();
-              if (rect.width > 100 && rect.height > 30) {
-                results.push(tag + '.' + classList.substring(0, 40) +
-                  ': ce=' + contentEditable + ', role=' + role + ', ph=' + placeholder.substring(0, 30));
+            // Expanded search for any text-capable element
+            const rect = el.getBoundingClientRect();
+            if (rect.width > 50 && rect.height > 20) {
+              const isEditable = contentEditable === 'true' ||
+                                role === 'textbox' ||
+                                tag === 'textarea' ||
+                                placeholder.includes('What do you want') ||
+                                placeholder.includes('想说什么') ||
+                                classList.includes('editor') ||
+                                classList.includes('ql-editor');
+
+              if (isEditable) {
+                results.push(tag + '.' + classList.substring(0, 30) +
+                  ': ce=' + contentEditable + ', role=' + role + ', ph=' + placeholder.substring(0, 20) +
+                  ', text=' + textContent + ', size=' + Math.round(rect.width) + 'x' + Math.round(rect.height));
               }
             }
           }
         }
-        return results.slice(0, 20).join(' | ');
+        return results.slice(0, 30).join(' | ');
       })()
     `,
     returnByValue: true,
   }, { sessionId: session.sessionId, timeoutMs: 30_000 });
 
-  console.log(`[linkedin] Editor candidates: ${editorDebug.result.value?.substring(0, 500) || 'none'}`);
+  console.log(`[linkedin] All text input candidates: ${editorDebug.result.value?.substring(0, 800) || 'none'}`);
 
-  // Wait for editor with extended timeout
-  let found = await waitForElement(session, EDITOR_SELECTORS, 15_000);
+  // Try to find and focus the editor with multiple attempts
+  let editorFound = false;
 
-  // If not found, try to find any contenteditable element
-  if (!found) {
-    console.log('[linkedin] Standard selectors not found, trying contenteditable...');
-    const hasContentEditable = await session.cdp.send<{ result: { value: boolean } }>('Runtime.evaluate', {
+  // Attempt 1: Standard selectors
+  console.log('[linkedin] Trying standard selectors...');
+  const found = await waitForElement(session, EDITOR_SELECTORS, 5_000);
+  if (found) {
+    console.log('[linkedin] Found editor via standard selectors');
+    editorFound = true;
+  }
+
+  // Attempt 2: Any contenteditable element that's large enough
+  if (!editorFound) {
+    console.log('[linkedin] Looking for any large contenteditable...');
+    const largeEditable = await session.cdp.send<{ result: { value: boolean } }>('Runtime.evaluate', {
       expression: `
         (function() {
-          const editables = document.querySelectorAll('[contenteditable="true"], [role="textbox"], div[placeholder]');
+          const editables = document.querySelectorAll('[contenteditable="true"]');
           for (const el of editables) {
             if (el.offsetParent !== null) {
               const rect = el.getBoundingClientRect();
-              if (rect.width > 100 && rect.height > 30) {
+              // Look for reasonably large contenteditable areas
+              if (rect.width > 200 && rect.height > 50) {
                 el.focus();
                 el.click();
+                // Make sure it's really focused
+                el.scrollIntoView({ block: 'center' });
                 return true;
               }
             }
@@ -239,19 +215,41 @@ async function fillEditor(session: ChromeSession, text: string): Promise<void> {
       returnByValue: true,
     }, { sessionId: session.sessionId });
 
-    found = hasContentEditable.result.value;
+    if (largeEditable.result.value) {
+      console.log('[linkedin] Found large contenteditable area');
+      editorFound = true;
+    }
   }
 
-  if (!found) {
-    console.log('[linkedin] Editor not found, trying to type anyway...');
+  // Attempt 3: Try clicking in the modal center area
+  if (!editorFound) {
+    console.log('[linkedin] Trying to click in modal center...');
+    await session.cdp.send('Input.dispatchMouseEvent', {
+      type: 'mousePressed',
+      x: window.innerWidth ? window.innerWidth / 2 : 500,
+      y: 300,
+      button: 'left',
+      clickCount: 1
+    }, { sessionId: session.sessionId });
+    await sleep(50);
+    await session.cdp.send('Input.dispatchMouseEvent', {
+      type: 'mouseReleased',
+      x: window.innerWidth ? window.innerWidth / 2 : 500,
+      y: 300,
+      button: 'left',
+      clickCount: 1
+    }, { sessionId: session.sessionId });
+    await sleep(500);
   }
 
-  // Type text using CDP input
+  // Type text
   console.log('[linkedin] Typing content...');
+
+  // First try to focus editor
   await session.cdp.send('Runtime.evaluate', {
     expression: `
       (function() {
-        // Try to find and focus the editor
+        // Try multiple ways to find and focus the editor
         const selectors = ${JSON.stringify(EDITOR_SELECTORS)};
         for (const selector of selectors) {
           const el = document.querySelector(selector);
@@ -262,18 +260,19 @@ async function fillEditor(session: ChromeSession, text: string): Promise<void> {
           }
         }
 
-        // Fallback: find any contenteditable
-        const editables = document.querySelectorAll('[contenteditable="true"], [role="textbox"]');
+        // Try any contenteditable
+        const editables = document.querySelectorAll('[contenteditable="true"]');
         for (const el of editables) {
           if (el.offsetParent !== null) {
-            el.focus();
-            el.click();
-            return true;
+            const rect = el.getBoundingClientRect();
+            if (rect.width > 100 && rect.height > 30) {
+              el.focus();
+              el.click();
+              return true;
+            }
           }
         }
 
-        // Last resort: click in the middle of the page
-        document.body.focus();
         return false;
       })()
     `,
@@ -282,10 +281,10 @@ async function fillEditor(session: ChromeSession, text: string): Promise<void> {
 
   await sleep(500);
 
-  // Type the text
+  // Type the text character by character
   await typeText(session, text);
   console.log('[linkedin] Content typed');
-  await sleep(1000);
+  await sleep(2000);
 }
 
 async function uploadImages(session: ChromeSession, images: string[]): Promise<void> {
@@ -358,121 +357,130 @@ async function uploadImages(session: ChromeSession, images: string[]): Promise<v
 async function submitPost(session: ChromeSession): Promise<void> {
   console.log('[linkedin] Looking for Post button...');
 
-  // Wait a bit for UI to stabilize
+  // Wait for UI to stabilize
   await sleep(3000);
 
-  // Debug: Show all buttons
-  const buttonDebug = await session.cdp.send<{ result: { value: string } }>('Runtime.evaluate', {
+  // Debug: Find all buttons with "Post" or similar text
+  const buttonSearch = await session.cdp.send<{ result: { value: any } }>('Runtime.evaluate', {
     expression: `
       (function() {
         const results = [];
         const all = document.querySelectorAll('*');
         for (const el of all) {
           if (el.offsetParent !== null) {
+            const text = (el.textContent || '').trim();
             const tag = el.tagName.toLowerCase();
             const classList = el.className || '';
-            const text = (el.textContent || '').trim().substring(0, 30);
             const ariaLabel = el.getAttribute('aria-label') || '';
 
-            // Look for buttons in the bottom area of posting modal
-            const rect = el.getBoundingClientRect();
-            if ((tag === 'button' || tag === 'div' || tag === 'span') &&
-                rect.width > 50 && rect.width < 300 && rect.height > 30 && rect.height < 80) {
-              const hasPostText = text.includes('Post') || text.includes('post') ||
-                                  text.includes('发布') || text.includes('發佈') ||
-                                  text.includes('Send') || text.includes('send') ||
-                                  ariaLabel.includes('Post') || ariaLabel.includes('post') ||
-                                  classList.includes('post') || classList.includes('share') ||
-                                  classList.includes('submit') || classList.includes('primary');
-              if (hasPostText) {
-                results.push(tag + '@' + Math.round(rect.x) + ',' + Math.round(rect.y) +
-                  ': ' + classList.substring(0, 40) + ': ' + text);
+            // Look for Post button specifically
+            if (tag === 'button' || tag === 'div' || tag === 'span') {
+              if (text === 'Post' || text === 'post' ||
+                  ariaLabel === 'Post' || ariaLabel === 'post' ||
+                  text === '发布' || text === '發佈') {
+                const rect = el.getBoundingClientRect();
+                if (rect.width > 30 && rect.height > 20 && rect.width < 300) {
+                  results.push({
+                    text: text,
+                    x: rect.x + rect.width / 2,
+                    y: rect.y + rect.height / 2,
+                    tag: tag,
+                    classList: classList.substring(0, 50)
+                  });
+                }
               }
             }
           }
         }
-        return results.slice(0, 15).join(' | ');
+        return results;
       })()
     `,
     returnByValue: true,
   }, { sessionId: session.sessionId, timeoutMs: 30_000 });
 
-  console.log(`[linkedin] Post button candidates: ${buttonDebug.result.value?.substring(0, 500) || 'none'}`);
+  console.log(`[linkedin] Post buttons found: ${JSON.stringify(buttonSearch.result.value)}`);
 
-  // Try to find and click the post button using multiple strategies
-  const clicked = await session.cdp.send<{ result: { value: boolean } }>('Runtime.evaluate', {
-    expression: `
-      (function() {
-        // Strategy 1: Use predefined selectors
-        const selectors = ${JSON.stringify(POST_BUTTON_SELECTORS)};
-        for (const selector of selectors) {
-          const el = document.querySelector(selector);
-          if (el && el.offsetParent !== null && !el.disabled) {
-            el.scrollIntoView({ block: 'center' });
-            el.click();
-            return true;
-          }
-        }
+  const buttons = buttonSearch.result.value;
+  if (!buttons || buttons.length === 0) {
+    console.log('[linkedin] No Post button found, trying alternative search...');
+    // Try broader search
+    const altSearch = await session.cdp.send<{ result: { value: any } }>('Runtime.evaluate', {
+      expression: `
+        (function() {
+          const all = document.querySelectorAll('button, [role="button"]');
+          for (const btn of all) {
+            if (btn.offsetParent !== null && !btn.disabled) {
+              const text = (btn.textContent || '').trim().toLowerCase();
+              const classList = (btn.className || '').toLowerCase();
+              const ariaLabel = (btn.getAttribute('aria-label') || '').toLowerCase();
 
-        // Strategy 2: Look for buttons with "Post" text
-        const allButtons = document.querySelectorAll('button, div[role="button"]');
-        for (const btn of allButtons) {
-          if (btn.offsetParent !== null && !btn.disabled) {
-            const text = (btn.textContent || '').trim();
-            const ariaLabel = (btn.getAttribute('aria-label') || '').toLowerCase();
-            const classList = (btn.className || '').toLowerCase();
-
-            if (text === 'Post' || text === 'post' || text === '发布' || text === '發佈' ||
-                ariaLabel.includes('post') || ariaLabel.includes('publish') ||
-                classList.includes('post') || classList.includes('share-primary') ||
-                classList.includes('submit')) {
-              btn.scrollIntoView({ block: 'center' });
-              btn.click();
-              return true;
+              if (text.includes('post') || text.includes('send') ||
+                  ariaLabel.includes('post') || ariaLabel.includes('send') ||
+                  classList.includes('share-primary') || classList.includes('post')) {
+                const rect = btn.getBoundingClientRect();
+                return {
+                  text: (btn.textContent || '').trim(),
+                  x: rect.x + rect.width / 2,
+                  y: rect.y + rect.height / 2
+                };
+              }
             }
           }
-        }
+          return { found: false };
+        })()
+      `,
+      returnByValue: true,
+    }, { sessionId: session.sessionId });
 
-        // Strategy 3: Look for primary action buttons in modal footer
-        const modalButtons = document.querySelectorAll('.share-actions__primary-action, .artdeco-button--primary, button[data-control-name="share.post"]');
-        for (const btn of modalButtons) {
-          if (btn.offsetParent !== null && !btn.disabled) {
-            btn.scrollIntoView({ block: 'center' });
-            btn.click();
-            return true;
-          }
-        }
+    if (altSearch.result.value?.found) {
+      const { x, y } = altSearch.result.value;
+      console.log(`[linkedin] Clicking alternative button at (${x}, ${y}): ${altSearch.result.value.text}`);
+      await session.cdp.send('Input.dispatchMouseEvent', {
+        type: 'mousePressed',
+        x, y,
+        button: 'left',
+        clickCount: 1
+      }, { sessionId: session.sessionId });
+      await sleep(50);
+      await session.cdp.send('Input.dispatchMouseEvent', {
+        type: 'mouseReleased',
+        x, y,
+        button: 'left',
+        clickCount: 1
+      }, { sessionId: session.sessionId });
+      console.log('[linkedin] Clicked!');
+      await sleep(3000);
+      return;
+    }
 
-        return false;
-      })()
-    `,
-    returnByValue: true,
+    console.log('[linkedin] Post button not found. You may need to click manually.');
+    console.log('[linkedin] Keeping browser open for 15 seconds...');
+    await sleep(15000);
+    return;
+  }
+
+  // Click the first (usually main) Post button
+  const postButton = buttons[0];
+  const { x, y, text } = postButton;
+  console.log(`[linkedin] Clicking Post button at (${x}, ${y}): ${text}`);
+
+  await session.cdp.send('Input.dispatchMouseEvent', {
+    type: 'mousePressed',
+    x, y,
+    button: 'left',
+    clickCount: 1
+  }, { sessionId: session.sessionId });
+  await sleep(50);
+  await session.cdp.send('Input.dispatchMouseEvent', {
+    type: 'mouseReleased',
+    x, y,
+    button: 'left',
+    clickCount: 1
   }, { sessionId: session.sessionId });
 
-  if (clicked.result.value) {
-    console.log('[linkedin] Post submitted!');
-    await sleep(3000);
-  } else {
-    // Try pressing Enter as fallback
-    console.log('[linkedin] Button not found, trying Enter key...');
-    await session.cdp.send('Input.dispatchKeyEvent', {
-      type: 'keyDown',
-      key: 'Enter',
-      code: 'Enter',
-      windowsVirtualKeyCode: 13
-    }, { sessionId: session.sessionId });
-    await session.cdp.send('Input.dispatchKeyEvent', {
-      type: 'keyUp',
-      key: 'Enter',
-      code: 'Enter',
-      windowsVirtualKeyCode: 13
-    }, { sessionId: session.sessionId });
-    await sleep(2000);
-
-    // If still not submitted, throw error
-    console.log('[linkedin] If post not submitted, please click manually. Browser will stay open for 10s...');
-    await sleep(10000);
-  }
+  console.log('[linkedin] Post clicked! Waiting for submission...');
+  await sleep(3000);
+  console.log('[linkedin] Post submitted!');
 }
 
 export async function postToLinkedIn(options: PostOptions): Promise<void> {
