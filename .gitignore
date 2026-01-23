@@ -1,0 +1,27 @@
+# 敏感配置文件 - 各个 skill 的 .env 和 cookies
+.env
+cookies.txt
+*.json
+
+# 登录状态文件
+*xhs_browser_state.json
+*browser_state.json
+*state.json
+
+# 截图和临时文件
+screenshots/
+*.png
+*.jpg
+*.jpeg
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+
+# Node/Bun
+node_modules/
+*.log
+.DS_Store
