@@ -1,0 +1,12 @@
+{
+  "version": "2026-10-17/R1",
+  "status": "pending-human-confirmation",
+  "sha256": {
+    "shared-rules.md": "d6a2a5e17141c412c9937f8000f0bb75e7f056da66825cf6ae2117421e372031",
+    "wechat/rules.md": "bfa98bcf48bab14670d100c00454b1770b316984dc0a881ca417cdc95034221d",
+    "x/rules.md": "bfddacf53a3b345208a0971f49d47f46d3dedff7e6fad589803e61e51f0690ae",
+    "linkedin/rules.md": "d464bd80638d0941085f2861c0a0f820855a07a97cee54aa5e0b008ad626b1cb",
+    "xiaohongshu/rules.md": "2b111bb6492cead6ac80eb2ac4dac4340d9f88f28832d0dd6cdd4887a0a9c429",
+    "tencent-docs/rules.md": "49e1e3914ca253ce5b47255e65c2cc3ad8cdc162f671b49e3e3b56f4d6ecb78c"
+  }
+}
