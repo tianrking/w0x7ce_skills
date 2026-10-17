@@ -4,7 +4,7 @@
 
 Human-readable rules describe intent. Draft rules first, obtain explicit confirmation of the specific version, then implement and validate skills. Meaningful changes are committed locally and synced to registered installations. Remote pushes remain separately authorized.
 
-Five existing publishing skills are preserved under x/, linkedin/, xiaohongshu/ and tencent-docs/. Newly extracted platform rules remain drafts; WeChat delivery rules are also included as a draft. The previously confirmed VPS initialization skill is preserved under vps/. The maintenance entry is skills/personal-sop-maintainer/.
+Five existing publishing skills are preserved under x/, linkedin/, xiaohongshu/ and tencent-docs/. Newly extracted platform rules remain drafts. The WeChat Official Account workflow lives in wechat-official-account/, with its delivery rules and w0x7ce-wechat-official-account skill. The previously confirmed VPS initialization skill is preserved under vps/. The maintenance entry is skills/personal-sop-maintainer/.
 
 ## Install
 

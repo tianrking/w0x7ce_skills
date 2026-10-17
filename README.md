@@ -23,7 +23,7 @@ w0x7ce_skills/
 ├── linkedin/                   LinkedIn 文字及圖片
 ├── xiaohongshu/                本機 Chrome／遠端 Browserless
 ├── tencent-docs/               騰訊文字文件
-├── wechat/                     微信文章交付規範
+├── wechat-official-account/    微信公眾號文章寫作、排版與打包
 ├── vps/                        已確認的 VPS 初始化基線
 ├── docs/                       遷移記錄及原有 Skill 目錄
 ├── tests/                      離線測試及素材
@@ -40,10 +40,10 @@ w0x7ce_skills/
 | LinkedIn | w0x7ce-post-to-linkedin | 匯入待確認 |
 | 小紅書 | w0x7ce-post-to-rednote、w0x7ce-xhs-browserless | 匯入待確認 |
 | 騰訊文件 | w0x7ce-post-to-tencent-docs | 匯入待確認 |
-| 微信公眾號 | 完整 HTML、複製按鈕、Markdown＋相對圖片及封面 | 待確認；尚無子 Skill |
+| 微信公眾號 | w0x7ce-wechat-official-account：寫作、封面、複製頁與來源包 | 按已展示規範建立；離線驗證見領域記錄 |
 | VPS | vps-initialize：初始化及網路工具僅預裝 | 沿用已確認版本與資源記錄 |
 
-結構遷移與 Git 提交不代表規範獲批，也不代表已重新登入或驗證發布。初次 install 建立根維護入口，後續 sync 會發布已確認且版本有效的子 Skill，目前包括 VPS；新發布平台子 Skill 須先確認。
+結構遷移與 Git 提交不代表規範獲批，也不代表已重新登入或驗證發布。初次 install 建立根維護入口，後續 sync 會發布已確認且版本有效的子 Skill，目前包括 VPS 與微信公眾號；其他發布平台子 Skill 須先確認。
 
 ## 安裝到 Codex
 

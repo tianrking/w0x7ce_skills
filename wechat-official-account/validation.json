@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-17",
+  "scope": "Local fixture and browser verification; no real WeChat draft or publishing operation.",
+  "python_tests": {
+    "passed": 28,
+    "new_delivery_tests": 3
+  },
+  "structure": {
+    "skills": 8,
+    "passed": true
+  },
+  "skill_frontmatter": "quick_validate passed with UTF-8 mode and isolated PyYAML dependency",
+  "browser": {
+    "browser": "Chrome headless",
+    "richClipboard": true,
+    "plainClipboard": true,
+    "titleOnly": true,
+    "legacyBodyFallback": true,
+    "legacyTitleFallback": true,
+    "imagesLoaded": true,
+    "noDesktopOverflow": true
+  },
+  "content_limits": [
+    "Packager accepts reviewed Markdown and HTML fragment; it does not convert Markdown or establish semantic parity.",
+    "No real account save/reopen or public publishing tested.",
+    "Fixture cover is a test asset, not a generated article cover."
+  ]
+}

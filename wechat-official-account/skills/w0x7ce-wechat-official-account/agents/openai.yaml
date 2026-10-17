@@ -1,0 +1,4 @@
+interface:
+  display_name: "微信公眾號文章"
+  short_description: "繁體文章查證、圖文與封面、微信富文字複製頁及可搬移來源包交付"
+  default_prompt: "使用 $w0x7ce-wechat-official-account 製作完整微信公眾號文章，附封面、複製頁及 Markdown 圖片來源包。"

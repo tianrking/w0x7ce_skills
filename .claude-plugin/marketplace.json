@@ -27,7 +27,8 @@
         "./linkedin/skills/w0x7ce-post-to-linkedin",
         "./xiaohongshu/skills/w0x7ce-post-to-rednote",
         "./xiaohongshu/skills/w0x7ce-xhs-browserless",
-        "./tencent-docs/skills/w0x7ce-post-to-tencent-docs"
+        "./tencent-docs/skills/w0x7ce-post-to-tencent-docs",
+        "./wechat-official-account/skills/w0x7ce-wechat-official-account"
       ]
     },
     {

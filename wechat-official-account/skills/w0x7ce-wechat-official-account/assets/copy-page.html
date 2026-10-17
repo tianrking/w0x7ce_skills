@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>@@TITLE@@</title>
+<style>body{margin:0;background:#f4f5f6;color:#24282c;font-family:system-ui,sans-serif}main{max-width:760px;margin:auto;padding:32px 24px;background:white}nav{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}button{padding:10px 18px;border:1px solid #cdd4d7;border-radius:6px;background:#fff;cursor:pointer}#status{font-size:13px;color:#53656d;min-height:22px}img{max-width:100%;height:auto}#article{overflow-wrap:anywhere}pre{white-space:pre-wrap}table{max-width:100%}</style></head>
+<body><main><nav aria-label="文章複製工具"><button id="copy-body">一鍵複製正文</button><button id="copy-title">一鍵複製題目</button></nav><p id="status" role="status">複製後貼入公眾號網頁編輯器；圖片原檔見來源包。</p><h1 id="title">@@TITLE@@</h1><section id="article">@@BODY@@</section></main>
+<script>
+const article = document.getElementById('article');
+const status = document.getElementById('status');
+function legacyCopy(html, text) {
+  const selection = window.getSelection();
+  const ranges = Array.from({length: selection.rangeCount}, (_,i) => selection.getRangeAt(i).cloneRange());
+  const previous = document.activeElement;
+  const scratch = document.createElement('div');
+  scratch.contentEditable = 'true'; scratch.style.cssText = 'position:fixed;left:-9999px;top:0';
+  scratch.textContent = text; document.body.appendChild(scratch); scratch.focus();
+  const range = document.createRange(); range.selectNodeContents(scratch);
+  selection.removeAllRanges(); selection.addRange(range);
+  const handler = event => { event.preventDefault(); event.clipboardData.setData('text/plain', text); if (html !== null) event.clipboardData.setData('text/html', html); };
+  document.addEventListener('copy', handler);
+  try { if (!document.execCommand('copy')) throw new Error('copy denied'); }
+  finally { document.removeEventListener('copy', handler); scratch.remove(); selection.removeAllRanges(); ranges.forEach(r => selection.addRange(r)); if (previous) previous.focus(); }
+}
+async function copyBody() {
+  const html = article.innerHTML, text = article.innerText;
+  try {
+    try {
+      if (!navigator.clipboard || !window.ClipboardItem) throw new Error('clipboard unavailable');
+      await navigator.clipboard.write([new ClipboardItem({'text/html': new Blob([html], {type:'text/html'}), 'text/plain': new Blob([text], {type:'text/plain'})})]);
+    } catch (_) { legacyCopy(html, text); }
+    status.textContent = '正文已複製（富文字與純文字），請貼入正文欄。';
+  } catch (_) { status.textContent = '瀏覽器禁止複製，請選取正文手動複製；圖片原檔在來源包。'; }
+}
+async function copyTitle() {
+  const text = document.getElementById('title').textContent;
+  try {
+    try { if (!navigator.clipboard) throw new Error('clipboard unavailable'); await navigator.clipboard.writeText(text); }
+    catch (_) { legacyCopy(null, text); }
+    status.textContent = '題目已複製，請貼入標題欄。';
+  } catch (_) { status.textContent = '瀏覽器禁止複製，請選取題目手動複製。'; }
+}
+document.getElementById('copy-body').addEventListener('click', copyBody);
+document.getElementById('copy-title').addEventListener('click', copyTitle);
+</script></body></html>

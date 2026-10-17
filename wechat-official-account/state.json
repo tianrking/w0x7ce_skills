@@ -1,0 +1,8 @@
+{
+  "status": "approved",
+  "rules_sha256": "bfa98bcf48bab14670d100c00454b1770b316984dc0a881ca417cdc95034221d",
+  "confirmation": {
+    "evidence": "使用者在完整 R1 五平台審閱稿展示後，針對微信公眾號要求改名及依 rules 建立 skills。原話：「w爲什麽我們最核心的 微信公衆號文章名字叫微信呢 實際上影噶叫微信公衆號對吧而且不知有rules 文字的的還有 按照rules最優的的skills」。此明確實作指示僅對應已展示的 R1 微信公眾號 rules，指紋不變，不批准其他四平台。",
+    "recorded_at": "2026-10-17T05:16:47.467803+00:00"
+  }
+}
