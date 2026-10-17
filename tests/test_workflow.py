@@ -74,7 +74,7 @@ class InstallerTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.fixture = tempfile.TemporaryDirectory()
-        cls.source = Path(cls.fixture.name)/'source'
+        cls.source = (Path(cls.fixture.name)/'source').resolve()
         cls.source.mkdir()
         shutil.copytree(ROOT/'skills/personal-sop-maintainer', cls.source/'skills/personal-sop-maintainer')
         (cls.source/'scripts').mkdir()

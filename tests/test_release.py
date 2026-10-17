@@ -17,7 +17,7 @@ from locks import lock
 class ReleaseTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
-        self.root = Path(self.tmp.name)/'source'
+        self.root = (Path(self.tmp.name)/'source').resolve()
         self.root.mkdir()
         self.home = Path(self.tmp.name)/'home'
         self.registry = self.root/'.local/installations.json'
@@ -180,6 +180,16 @@ class ReleaseTests(unittest.TestCase):
             finish.finish(self.root, ['rules.md'], 'Synthetic commit before sync failure', self.registry, lambda _: None)
         self.assertNotEqual(self.command('rev-parse', 'HEAD'), previous)
         self.assertEqual((conflict/'SKILL.md').read_text(), 'Unrelated owner')
+
+    def test_receipt_alias_is_normalized_without_losing_owned_children(self):
+        records=sop.read_json(self.registry)
+        records[0]['home']=str(self.home/'..'/'home')
+        records[0]['installed_skills']=['personal-sop-maintainer','existing-child']
+        sop.write_json(self.registry,records)
+        sync.register(self.registry,'codex','user',self.home,None,True)
+        records=sop.read_json(self.registry)
+        self.assertEqual(len(records),1)
+        self.assertIn('existing-child',records[0]['installed_skills'])
 
 
 if __name__ == '__main__':

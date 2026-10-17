@@ -148,7 +148,7 @@ def main():
         plans = [install(a, args.scope, args.home.resolve(), args.target, args.with_guidance, False) for a in agents]
         results = plans
         if args.apply:
-            from sync import snapshot, register
+            from sync import snapshot, register, installation_key
             from locks import lock
             with contextlib.ExitStack() as stack:
                 stack.enter_context(lock(ROOT, 'install'))
@@ -164,15 +164,15 @@ def main():
                     old_registry = MIGRATE_FROM/'.local/installations.json'
                     old_records = read_json(old_registry) if old_registry.exists() else []
                     target = str(args.target.resolve()) if args.target else None
+                    wanted = {installation_key({'agent':agent,'scope':args.scope,'home':str(args.home),'target':target}) for agent in agents}
                     def transferred(record):
-                        return (record['agent'] in agents and record['scope']==args.scope
-                                and Path(record['home']).resolve()==args.home.resolve() and record['target']==target)
+                        return installation_key(record) in wanted
                     # Preserve the old owned child inventory so removed/stale
                     # children can be deactivated instead of left discoverable.
                     current = read_json(args.registry)
                     for record in current:
                         for previous in old_records:
-                            if transferred(previous) and all(record[key]==previous[key] for key in ['agent','scope','home','target']):
+                            if transferred(previous) and installation_key(record)==installation_key(previous):
                                 record['installed_skills'] = previous.get('installed_skills',[NAME])
                     write_json(args.registry,current)
                     from sync import sync_all

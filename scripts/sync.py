@@ -43,13 +43,18 @@ def snapshot(root):
         yield destination, revision
 
 
+def installation_key(record):
+    return (record['agent'], record['scope'], str(Path(record['home']).resolve()),
+            str(Path(record['target']).resolve()) if record['target'] else None)
+
+
 def register(registry, agent, scope, home, target, with_guidance):
     records = sop.read_json(registry) if registry.exists() else []
-    record = {'agent': agent, 'scope': scope, 'home': str(home),
+    record = {'agent': agent, 'scope': scope, 'home': str(home.resolve()),
               'target': str(target.resolve()) if target else None, 'with_guidance': with_guidance}
-    key = (agent, scope, record['home'], record['target'])
+    key = installation_key(record)
     for previous in records:
-        if (previous['agent'], previous['scope'], previous['home'], previous['target']) == key:
+        if installation_key(previous) == key:
             record['installed_skills'] = previous.get('installed_skills', [installer.NAME])
             records.remove(previous)
             break
