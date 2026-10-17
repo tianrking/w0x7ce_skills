@@ -4,6 +4,8 @@
 
 人描述工作規範，Agent 將已確認規範落實為 Skill。先從實際需求整理 rules，確認具體版本後再完善流程，不將單篇案例當成所有平台的固定模板。
 
+第一次把倉庫交給 Agent，從 [接手指南](docs/agent-handoff.md) 選擇對應 Skill。它列出所有領域的直接入口與目前狀態，不需要逐層猜測目錄用途。
+
 ```text
 實際任務 → rules 草案 → 人確認 → Skill 實作與驗證
                                       ↓
@@ -54,9 +56,12 @@ git clone https://github.com/tianrking/w0x7ce_skills.git
 cd w0x7ce_skills
 python scripts/install.py --agent codex --scope user --with-guidance
 python scripts/install.py --agent codex --scope user --with-guidance --apply
+python scripts/sync.py --apply
 ```
 
 第一條 install 只預覽，第二條執行。入口放入 `~/.agents/skills/personal-sop-maintainer/`，短閱讀指令加入 `~/.codex/AGENTS.md`（跟隨 CODEX_HOME），保留既有內容。省略 `--with-guidance` 可只安裝 Skill。
+
+install 登記目標並安裝根維護入口；接著執行 sync 才安裝已確認且資源有效的子 Skill。現有目標若屬另一份來源，使用明確的來源遷移參數，不覆蓋同名目錄。此倉庫有待確認平台，sync 回報它們被 blocked 是預期狀態。
 
 以 `$personal-sop-maintainer` 明確呼叫。自動選用取決於宿主與描述匹配；既有對話可能需要重新讀取或重開，這不是背景監控服務。
 
@@ -72,12 +77,19 @@ python scripts/install.py --agent codex --scope user --with-guidance --migrate-f
 
 可另行使用 `--agent claude --scope user --with-guidance --apply` 安裝並登記同步。也保留 marketplace：
 
+```sh
+python scripts/install.py --agent claude --scope user --with-guidance --apply
+python scripts/sync.py --apply
+```
+
 ```text
 /plugin marketplace add tianrking/w0x7ce_skills
 /plugin install sop-maintenance@w0x7ce-skills
 ```
 
 原 `publishing-skills` 插件名稱保留，包含五個遷移入口，執行前仍檢查規範狀態。插件安裝不等於規範確認，也不會自動加入 Python 同步器的登記。不要在同一宿主重複安裝同名入口。
+
+該插件另包含新的微信公眾號入口。要使用本文的唯一來源維護與自動同步，優先採用 Python 安裝流程；插件快取可能不是適合長期修改的維護 checkout。
 
 ## 建立及維護規範
 

@@ -2,6 +2,8 @@
 
 [繁體中文](README.md)
 
+Start with the [agent handoff guide](docs/agent-handoff.md). It links directly to each domain skill and explains status, prerequisites and source versus installed usage. Detailed instructions are in Traditional Chinese.
+
 Human-readable rules describe intent. Draft rules first, obtain explicit confirmation of the specific version, then implement and validate skills. Meaningful changes are committed locally and synced to registered installations. Remote pushes remain separately authorized.
 
 Five existing publishing skills are preserved under x/, linkedin/, xiaohongshu/ and tencent-docs/. Newly extracted platform rules remain drafts. The WeChat Official Account workflow lives in wechat-official-account/, with its delivery rules and w0x7ce-wechat-official-account skill. The previously confirmed VPS initialization skill is preserved under vps/. The maintenance entry is skills/personal-sop-maintainer/.
@@ -15,9 +17,12 @@ git clone https://github.com/tianrking/w0x7ce_skills.git
 cd w0x7ce_skills
 python scripts/install.py --agent codex --scope user --with-guidance
 python scripts/install.py --agent codex --scope user --with-guidance --apply
+python scripts/sync.py --apply
 ```
 
 The first install previews changes. The second installs the entry to ~/.agents/skills/ and adds an owned guidance block to ~/.codex/AGENTS.md. Use $personal-sop-maintainer. Existing conversations may need to reread instructions or restart.
+
+Then sync installs approved, fingerprint-valid child skills to registered targets. Draft platforms remain blocked. Giving a repository to an agent does not itself install skills or guarantee automatic discovery; the agent can explicitly read the source entry instead.
 
 Use --agent claude for Claude Code. The marketplace offers sop-maintenance, publishing-skills compatibility entries requiring confirmed rules, and infrastructure-skills for the existing VPS workflow. Plugin installation is not registered with the Python sync tool automatically.
 

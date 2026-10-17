@@ -2,6 +2,8 @@
 
 先讀根目錄 `rules.md`，再讀 `shared-rules.md`，最後只讀本次相關領域的 `rules.md` 及 `state.json`。
 
+第一次接手時閱讀 `docs/agent-handoff.md`，從任務表選領域，直接讀對應領域的 `rules.md` 及 `skills/<名稱>/SKILL.md`。先執行 `python scripts/sop.py status`；平台列表或舊指南不能代替目前的確認及資源指紋狀態。只給 Git 倉庫不代表所有宿主自動發現子 Skill；可從來源入口直接閱讀使用，或依 README 安裝後再同步。
+
 要總結、抽象或完善 SOP 時，讀 `skills/personal-sop-maintainer/SKILL.md`。新增或實質修訂領域規範先形成草案，交給人明確確認，再建立或更新對應子 Skill。不得自行宣稱使用者已確認。
 
 既有規範確認指紋不符時，不使用它產生子 Skill。已有確認版的變更寫入 `rules.draft.md`，保留目前生效的 `rules.md`。
