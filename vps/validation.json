@@ -1,0 +1,16 @@
+{
+  "date": "2026-10-17",
+  "skill": "vps-initialize",
+  "rules_import": "Exact previously delivered AGENT-VPS-BASELINE.txt; current user explicitly requested conversion to this skill",
+  "checks": {
+    "skill_creator_quick_validate": "passed",
+    "bootstrap_bash_syntax": "passed",
+    "network_preinstall_bash_syntax": "passed",
+    "isolated_network_lifecycle_cases": {"passed": 10, "total": 10}
+  },
+  "live_server_changed": false,
+  "new_network_packages_live_install_tested": false,
+  "reference_thread": "01a145b6-57c8-7b50-8545-9fa1b9d83e5a",
+  "reference_thread_messaged_or_interrupted": false,
+  "boundary": "Format and isolated lifecycle verification do not establish live APT post-install behavior, all-agent discovery, or running-conversation refresh"
+}

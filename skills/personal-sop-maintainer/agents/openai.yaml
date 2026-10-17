@@ -1,0 +1,6 @@
+interface:
+  display_name: "個人 SOP 維護"
+  short_description: "整理跨平台工作規範，先交人確認 rules，再建立與完善對應的 Skill"
+  default_prompt: "使用 $personal-sop-maintainer 將這次工作整理成可重用的規範草案，待我確認後再建立子 Skill。"
+policy:
+  allow_implicit_invocation: true

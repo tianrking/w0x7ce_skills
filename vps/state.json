@@ -1,0 +1,8 @@
+{
+  "status": "approved",
+  "rules_sha256": "3731ac85978447d72db34e870928a2dd17c001bc2f389056355936e7a0b047cc",
+  "confirmation": {
+    "evidence": "使用者在本會話明確指示：把這套規範做成一個 skill，以後我讓 agent 初始化新 VPS 就直接用，Cloudflare 和 Tailscale 仍然只預裝不啟用。所指為此前已交付的 AGENT-VPS-BASELINE.txt；此次逐字匯入該具體規範，未改其目標或驗收條件。",
+    "recorded_at": "2026-10-17T04:17:35.122646+00:00"
+  }
+}

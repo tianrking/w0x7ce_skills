@@ -1,0 +1,42 @@
+[
+  {
+    "name": "w0x7ce-post-to-x",
+    "platform": "x",
+    "old_path": "skills/w0x7ce-post-to-x",
+    "path": "x/skills/w0x7ce-post-to-x",
+    "status": "imported-pending-review",
+    "primary_script": "scripts/x-browser.ts"
+  },
+  {
+    "name": "w0x7ce-post-to-linkedin",
+    "platform": "linkedin",
+    "old_path": "skills/w0x7ce-post-to-linkedin",
+    "path": "linkedin/skills/w0x7ce-post-to-linkedin",
+    "status": "imported-pending-review",
+    "primary_script": "scripts/linkedin-browser.ts"
+  },
+  {
+    "name": "w0x7ce-post-to-rednote",
+    "platform": "xiaohongshu",
+    "old_path": "skills/w0x7ce-post-to-rednote",
+    "path": "xiaohongshu/skills/w0x7ce-post-to-rednote",
+    "status": "imported-pending-review",
+    "primary_script": "scripts/rednote-browser.ts"
+  },
+  {
+    "name": "w0x7ce-xhs-browserless",
+    "platform": "xiaohongshu",
+    "old_path": "skills/w0x7ce-xhs-browserless",
+    "path": "xiaohongshu/skills/w0x7ce-xhs-browserless",
+    "status": "imported-pending-review",
+    "primary_script": "scripts/publish.ts"
+  },
+  {
+    "name": "w0x7ce-post-to-tencent-docs",
+    "platform": "tencent-docs",
+    "old_path": "skills/w0x7ce-post-to-tencent-docs",
+    "path": "tencent-docs/skills/w0x7ce-post-to-tencent-docs",
+    "status": "imported-pending-review",
+    "primary_script": "scripts/tencent-docs-browser.ts"
+  }
+]

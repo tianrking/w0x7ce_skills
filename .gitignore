@@ -1,27 +1,23 @@
-# 敏感配置文件 - 各个 skill 的 .env 和 cookies
-.env
-cookies.txt
-*.json
-
-# 登录状态文件
-*xhs_browser_state.json
-*browser_state.json
-*state.json
-
-# 截图和临时文件
-screenshots/
-*.png
-*.jpg
-*.jpeg
-
-# Python
+# Local installation receipts, exports and caches
+.local/
+.sop-root.json
+exports/
+tmp/
+work/
+node_modules/
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
 .pytest_cache/
 *.egg-info/
-
-# Node/Bun
-node_modules/
 *.log
 .DS_Store
+Thumbs.db
+# Session secrets; keep versioned examples and SOP state.json visible.
+.env
+.env.*
+!.env.example
+cookies.txt
+cookies.json
+*browser_state.json
+screenshots/
+screenshots_xhs/

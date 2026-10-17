@@ -1,0 +1,27 @@
+name: Verify SOP
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  offline:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python scripts/check.py
+      - run: python -m unittest discover -s tests -v
+      - uses: oven-sh/setup-bun@v2
+      - run: python scripts/check_typescript.py
+      - name: Verify dormant network tool lifecycle
+        shell: bash
+        run: |
+          bash -n vps/skills/vps-initialize/scripts/bootstrap-vps.sh
+          bash -n vps/skills/vps-initialize/scripts/preinstall-network-tools.sh
+          bash vps/skills/vps-initialize/scripts/test-network-preinstall.sh

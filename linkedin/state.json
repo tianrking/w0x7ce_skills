@@ -1,0 +1,9 @@
+{
+  "status": "draft",
+  "rules_sha256": null,
+  "confirmation": null,
+  "origin": "Imported existing repository workflows at 687db0e; structural migration is not human confirmation of these rules.",
+  "legacy_skills": [
+    "w0x7ce-post-to-linkedin"
+  ]
+}
